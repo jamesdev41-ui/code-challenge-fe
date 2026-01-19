@@ -20,7 +20,9 @@ export const AppHeader = () => {
             My Wallet
           </Typography>
           <Typography variant="h4" component="h1" textAlign="center">
-            ({wallets ? wallets.length : 0} currencies)
+            {wallets &&
+              wallets.length > 0 &&
+              `(${wallets.length} ${wallets.length > 1 ? "currencies" : "currency"})`}
           </Typography>
         </Grid>
         <Grid size={{ xs: 1, sm: 1, md: 2 }} textAlign="center">

@@ -16,11 +16,12 @@ Following the code challenge for the **Frontend Developer** position, I complete
 
 With the increasing adoption of AI tools in software development and the note from the instruction, I would like to be transparent about how AI assisted me during this challenge.
 
-### Problem 1 – ~10% AI Assistance
+### Problem 1 **[View problem solved](src/problem1/index.ts)** – ~10% AI Assistance
 AI was used mainly to generate and refine **code comments**.  
 I used **GitHub Copilot**, which understood the context well and helped speed up the commenting process. The core logic and implementation were entirely my own.
 
-### Problem 2 – ~60% AI Assistance
+### Problem 2 **[View Problem Documentation](src/problem2/README.md)** – ~60% AI Assistance
+
 AI played a more significant role in this part, particularly in:
 - Suggesting the **basic project structure**
 - Generating a **simple responsive layout using MUI**
@@ -29,8 +30,8 @@ AI played a more significant role in this part, particularly in:
 
 However, for more complex aspects—such as **business logic, form handling, and state management**—AI assistance was limited and often resulted in errors that required manual debugging and rework.
 
-### Problem 3 – ~20% AI Assistance
-This was my favorite part of the challenge, as it closely reflects **real-world development scenarios**.  
+### Problem 3 **[View problem comment](src/problem3/messy-file.tsx)** – ~20% AI Assistance
+This was my favorite part of the challenge, as it closely reflects **real-world development scenarios**. I jump on it right after finish the first problem.
 The problem required careful code reading, reasoning about existing behavior, and working through imperfect or messy implementations—something developers face daily.
 
 Approximately **80% of the ideas and solutions came from my own analysis**, 20% ai help me to validate my thoughts and give me some ideas i missed.

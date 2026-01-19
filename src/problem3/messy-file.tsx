@@ -3,7 +3,7 @@ interface WalletBalance {
   amount: number;
 }
 interface FormattedWalletBalance {
-  // Extends WalletBalance
+  // can Extends WalletBalance
   currency: string;
   amount: number;
   formatted: string;
