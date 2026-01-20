@@ -11,10 +11,10 @@ The problem required careful code reading, reasoning about existing behavior, an
 
 Overall, I found this problem to be the most realistic and intellectually engaging part of the challenge.
 
-
 ## Final Note AI Assistance Disclosure
 
-With the increasing adoption of AI tools in software development and the note from the instruction, I would like to be transparent about how AI assisted me during this challenge.
+With the increasing adoption of AI tools in software development and based on the instruction, I would like to be transparent about how AI assisted me during this challenge. How I simply used AI in this project was that I first coded the initial part by myself, then used AI to help complete the line. However, if the generated code did not fit my idea or logic, I would not accept it and would adjust or rewrite it.
+
 I view AI as a productivity tool rather than a replacement for engineering judgment.  
-Throughout this challenge, my focus was on understanding the problem deeply, making deliberate technical decisions, and using AI selectively to accelerate—not replace—my thinking process.
+Throughout this challenge, my focus was on understanding the problem deeply, making technical decisions on my own, and using AI selectively to accelerate — not replace — my thinking process.
 
