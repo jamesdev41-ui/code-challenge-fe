@@ -1,5 +1,5 @@
 import { WALLET_STORE, SIMULATED_DELAY } from "@common";
-import type { WalletType } from "@types";
+import type { ExchangeFormData, WalletType } from "@types";
 
 export const walletService = {
   init: () => {
@@ -38,24 +38,20 @@ export const walletService = {
     return walletData[currency] || 0;
   },
 
-  exchangeWallet: async (
-    fromCurrency: string,
-    toCurrency: string,
-    fromAmount: number,
-    toAmount: number,
-  ) => {
+  exchangeWallet: async (params: ExchangeFormData) => {
     await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY));
 
     const storedData = localStorage.getItem(WALLET_STORE);
     const walletData: Record<string, number> = storedData
       ? (JSON.parse(storedData) as Record<string, number>)
       : walletService.init();
-    const currentFromAmount = walletData[fromCurrency] || 0;
-    if (currentFromAmount < fromAmount) {
+    const currentFromAmount = walletData[params.fromToken] || 0;
+    if (currentFromAmount < params.fromAmount) {
       throw new Error("Insufficient funds");
     }
-    walletData[fromCurrency] -= fromAmount;
-    walletData[toCurrency] = (walletData[toCurrency] || 0) + toAmount;
+    walletData[params.fromToken] -= params.fromAmount;
+    walletData[params.toToken] =
+      (walletData[params.toToken] || 0) + params.toAmount;
 
     localStorage.setItem(WALLET_STORE, JSON.stringify(walletData));
   },

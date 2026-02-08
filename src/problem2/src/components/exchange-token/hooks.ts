@@ -195,8 +195,8 @@ export const useExchangeForm = (
     }
     exchangeWallet(
       {
-        fromCurrency: data.fromToken || "",
-        toCurrency: data.toToken || "",
+        fromToken: data.fromToken || "",
+        toToken: data.toToken || "",
         fromAmount: Number(data.fromAmount) || 0,
         toAmount: Number(data.toAmount) || 0,
       },

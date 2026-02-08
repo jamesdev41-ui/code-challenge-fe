@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { walletService } from "@api";
-import type { WalletType } from "@types";
+import type { ExchangeFormData, WalletType } from "@types";
 import { queryConfig } from "@common";
 
 export const walletQueryKeys = {
@@ -15,24 +15,12 @@ export const useWallets = () => {
   });
 };
 
-interface ExchangeWalletParams {
-  fromCurrency: string;
-  toCurrency: string;
-  fromAmount: number;
-  toAmount: number;
-}
-
 export const useExchangeWallet = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (params: ExchangeWalletParams) => {
-      await walletService.exchangeWallet(
-        params.fromCurrency,
-        params.toCurrency,
-        params.fromAmount,
-        params.toAmount,
-      );
+    mutationFn: async (params: ExchangeFormData) => {
+      await walletService.exchangeWallet(params);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: walletQueryKeys.all });
