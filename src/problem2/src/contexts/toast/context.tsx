@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from "react";
+import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { Snackbar, Alert, type AlertColor } from "@mui/material";
 import { ToastContext } from "./context-definition";
+import { TOAST_AUTO_HIDE_DURATION } from "@common";
 
 interface ToastProviderProps {
   children: ReactNode;
@@ -19,24 +20,29 @@ export const ToastProvider = ({ children }: ToastProviderProps) => {
     severity: "success",
   });
 
-  const showSuccess = (message: string) => {
+  const showSuccess = useCallback((message: string) => {
     setToast({ open: true, message, severity: "success" });
-  };
+  }, []);
 
-  const showError = (message: string) => {
+  const showError = useCallback((message: string) => {
     setToast({ open: true, message, severity: "error" });
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setToast((prev) => ({ ...prev, open: false }));
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ showSuccess, showError }),
+    [showSuccess, showError],
+  );
 
   return (
-    <ToastContext.Provider value={{ showSuccess, showError }}>
+    <ToastContext.Provider value={value}>
       {children}
       <Snackbar
         open={toast.open}
-        autoHideDuration={3000}
+        autoHideDuration={TOAST_AUTO_HIDE_DURATION}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >

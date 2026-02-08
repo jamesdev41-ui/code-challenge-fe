@@ -9,7 +9,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { type TokenPriceType } from "@types";
 import { useMemo, useEffect } from "react";
-import { getLatestPricesMap } from "@common";
+import { getLatestPricesMap, formatCurrencyAmount } from "@common";
 import { useExchangeForm } from "./hooks";
 import { useExchangeModal } from "@contexts";
 import { ExchangeForm } from "./exchange-form";
@@ -22,11 +22,7 @@ export const ExchangeModal = ({ prices }: ExchangeModalProps) => {
   const pricesMap = useMemo(() => getLatestPricesMap(prices), [prices]);
   const { isOpen, closeModal } = useExchangeModal();
 
-  const formSubmitCallback = () => {
-    closeModal();
-  };
-
-  const exchangeForm = useExchangeForm(pricesMap, formSubmitCallback);
+  const exchangeForm = useExchangeForm(pricesMap, () => closeModal());
   const { fromToken, isPending, resetForm, ballance } = exchangeForm;
 
   useEffect(() => {
@@ -58,16 +54,12 @@ export const ExchangeModal = ({ prices }: ExchangeModalProps) => {
           <Typography variant="h5" component="h2" gutterBottom>
             Swap Tokens
           </Typography>
-          <Typography variant="h5" component="h2" gutterBottom>
-            {fromToken &&
-              `Current ${fromToken} balance: ${ballance.toLocaleString(
-                undefined,
-                {
-                  maximumFractionDigits: 6,
-                },
-              )}`}
-          </Typography>
-          <ExchangeForm prices={prices} formData={exchangeForm} />
+          {fromToken && (
+            <Typography variant="body1" gutterBottom>
+              Current {fromToken} balance: {formatCurrencyAmount(ballance)}
+            </Typography>
+          )}
+          <ExchangeForm pricesMap={pricesMap} formData={exchangeForm} />
         </ModalContainer>
       </ExchangeStyled>
     </Modal>

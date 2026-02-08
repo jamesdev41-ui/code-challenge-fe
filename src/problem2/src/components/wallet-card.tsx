@@ -1,4 +1,5 @@
 import { TokenAvatar } from "@atom";
+import { formatCurrencyAmount } from "@common";
 import { useExchangeModal } from "@contexts";
 import {
   Box,
@@ -8,7 +9,7 @@ import {
   CardContent,
   Typography,
 } from "@mui/material";
-import React, { useMemo } from "react";
+import React, { useCallback } from "react";
 
 interface WalletCardProps {
   currency: string;
@@ -19,30 +20,22 @@ export const WalletCard = React.memo(
   ({ currency, amount }: WalletCardProps) => {
     const { openModal } = useExchangeModal();
 
-    const handleExchangeClick = () => {
+    const handleExchangeClick = useCallback(() => {
       openModal(currency);
-    };
-
-    const formattedAmount = useMemo(
-      () =>
-        amount.toLocaleString(undefined, {
-          maximumFractionDigits: 6,
-        }),
-      [amount],
-    );
+    }, [openModal, currency]);
 
     return (
       <Card>
         <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <TokenAvatar token={currency} size={40}/> &nbsp;
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+            <TokenAvatar token={currency} size={40} />
             <Typography variant="h6">{currency}</Typography>
           </Box>
           <Typography variant="body2">
-            {`Your current balance in the wallet `}
+            Your current balance in the wallet
           </Typography>
           <Typography variant="h6" sx={{ mt: 1 }}>
-            {formattedAmount} {currency}
+            {formatCurrencyAmount(amount)} {currency}
           </Typography>
         </CardContent>
         <CardActions>
@@ -54,3 +47,5 @@ export const WalletCard = React.memo(
     );
   },
 );
+
+WalletCard.displayName = "WalletCard";

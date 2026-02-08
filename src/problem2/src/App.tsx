@@ -1,5 +1,5 @@
 import "./App.css";
-import { Grid, Skeleton } from "@mui/material";
+import { Grid, Skeleton, CircularProgress, Backdrop } from "@mui/material";
 import { ExchangeModal, WalletCard, AppHeader } from "@components";
 import { useAllPrices, useWallets } from "@api/hooks";
 import { useMemo } from "react";
@@ -24,7 +24,7 @@ function App() {
   const walletBoxes = useMemo(() => {
     if (!wallets) return null;
     return wallets.map((wallet) => (
-      <Grid size={{ xs: 1, sm: 1, md: 1 }} key={wallet.currency}>
+      <Grid size={1} key={wallet.currency}>
         <WalletCard currency={wallet.currency} amount={wallet.amount} />
       </Grid>
     ));
@@ -35,21 +35,33 @@ function App() {
       {/* header */}
       <AppHeader />
 
+      {/* Loading overlay khi refetch */}
+      <Backdrop
+        open={!isLoading && isFetching}
+        sx={{
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: "rgba(0, 0, 0, 0.3)",
+        }}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       {/* body */}
       <Grid
         container
         spacing={{ xs: 2, md: 3 }}
         columns={{ xs: 1, sm: 2, md: 4 }}
       >
-        {(isLoading || isFetching) &&
+        {isLoading &&
           Array.from({ length: 4 }).map((_, index) => (
-            <Grid size={{ xs: 1, sm: 1, md: 1 }} key={`skeleton-${index}`}>
+            <Grid size={1} key={`skeleton-${index}`}>
               <Skeleton variant="rectangular" height={150} />
             </Grid>
           ))}
 
         {(isError || isPricesError) && (
-          <Grid size={{ xs: 1, sm: 2, md: 4 }}>
+          <Grid size={4}>
             {isError && <ErrorBox error={error} refetch={refetch} />}
             {isPricesError && (
               <ErrorBox error={pricesError} refetch={refetchPrices} />
@@ -57,7 +69,7 @@ function App() {
           </Grid>
         )}
 
-        {!isLoading && !isError && !isFetching && walletBoxes}
+        {wallets && !isError && walletBoxes}
       </Grid>
 
       <ExchangeModal prices={prices || []} />

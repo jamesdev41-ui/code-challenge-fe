@@ -3,7 +3,7 @@ import { ERROR_MESSAGES } from "@common";
 
 interface ErrorBoxProps {
   error?: Error;
-  refetch: () => void;
+  refetch?: () => void;
 }
 
 export const ErrorBox = ({ error, refetch }: ErrorBoxProps) => {
@@ -12,12 +12,15 @@ export const ErrorBox = ({ error, refetch }: ErrorBoxProps) => {
       <Alert
         severity="error"
         action={
-          <Button color="inherit" size="small" onClick={() => refetch()}>
-            Retry
-          </Button>
+          refetch && (
+            <Button color="inherit" size="small" onClick={refetch}>
+              Retry
+            </Button>
+          )
         }
       >
-        {ERROR_MESSAGES.FAILED_TO_LOAD}: {error?.message || ERROR_MESSAGES.UNKNOWN_ERROR}
+        {ERROR_MESSAGES.FAILED_TO_LOAD}:{" "}
+        {error?.message ?? ERROR_MESSAGES.UNKNOWN_ERROR}
       </Alert>
     </Box>
   );

@@ -8,6 +8,18 @@ import {
   SECOND_TO_MILLISECONDS,
 } from "@common";
 
+const EXPONENTIAL_BASE = 2;
+
+// Type guard for AxiosError
+const isAxiosError = (error: unknown): error is AxiosError => {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "isAxiosError" in error &&
+    (error as AxiosError).isAxiosError === true
+  );
+};
+
 export const priceClient: AxiosInstance = axios.create({
   baseURL: PRICE_API_URL,
   timeout: MAX_TIMEOUT,
@@ -16,42 +28,34 @@ export const priceClient: AxiosInstance = axios.create({
   },
 });
 
-/**
- * Response Interceptor for Public Client
- * Basic error handling
- */
-priceClient.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    console.error("Access forbidden");
-
-    return Promise.reject(error);
-  },
-);
-
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // Global retry strategy
       retry: (failureCount: number, error: unknown) => {
-        const axiosError = error as AxiosError;
-        // Don't retry on 4xx errors
+        // Type-safe error check
+        if (!isAxiosError(error)) {
+          return failureCount < MAX_RETRIES;
+        }
+
+        const status = error.response?.status;
+
+        // Don't retry on client errors (4xx)
         if (
-          axiosError?.response?.status &&
-          axiosError.response.status >= HttpStatusCode.BadRequest &&
-          axiosError.response.status < HttpStatusCode.InternalServerError
+          status &&
+          status >= HttpStatusCode.BadRequest &&
+          status < HttpStatusCode.InternalServerError
         ) {
           return false;
         }
-        // Retry max 2 times for 5xx and network errors
+
+        // Retry on 5xx errors and network errors
         return failureCount < MAX_RETRIES;
       },
-      // Retry delay
+      // Exponential backoff: 1s, 2s, 4s, ... (capped at MAX_TIMEOUT)
       retryDelay: (attemptIndex: number) =>
         Math.min(
-          SECOND_TO_MILLISECONDS * MAX_RETRIES ** attemptIndex,
+          SECOND_TO_MILLISECONDS * EXPONENTIAL_BASE ** attemptIndex,
           MAX_TIMEOUT,
         ),
     },

@@ -6,8 +6,6 @@ export const TOKEN_ICON_FALLBACK = "/not-found-icon-10.jpg";
 
 export const PRICE_API_URL = "https://interview.switcheo.com/";
 
-export const WALLET_STORE = "wallets";
-
 export const API_ENDPOINTS = {
   PRICES: "prices.json",
 };
@@ -17,6 +15,7 @@ export const ERROR_MESSAGES = {
   FETCH_WALLETS: "Failed to fetch wallet data.",
   FAILED_TO_LOAD: "Failed to load data",
   UNKNOWN_ERROR: "Unknown error",
+  SAVE_WALLET: "Failed to save wallet data.",
   VALIDATE: {
     MISSING_TOKEN: "Please select a token",
     AMOUNT_MUST_BE_NUMBER: "Amount must be a number",

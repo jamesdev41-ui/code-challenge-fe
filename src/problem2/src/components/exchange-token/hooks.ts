@@ -6,6 +6,7 @@ import {
   type TokenPriceType,
 } from "@types";
 import { ERROR_MESSAGES } from "@common";
+import { DECIMAL_PRECISION, DECIMAL_MULTIPLIER } from "@common/configs";
 import { useCallback, useState } from "react";
 
 type TokenForm = Partial<Omit<ExchangeFormData, "fromAmount" | "toAmount">>;
@@ -35,7 +36,6 @@ const keyTokenExchange: Record<keyof TokenForm, keyof TokenForm> = {
   fromToken: "toToken",
   toToken: "fromToken",
 };
-const errorsDefaultValue: FormError = {} as FormError;
 
 export const useExchangeForm = (
   prices: Record<string, TokenPriceType>,
@@ -48,21 +48,24 @@ export const useExchangeForm = (
   const [amountForm, setAmountForm] = useState<AmountForm>(
     amountFormDefaultValue,
   );
-  const [formError, setFormError] = useState<FormError | undefined>(
-    errorsDefaultValue,
-  );
+  const [formError, setFormError] = useState<FormError | undefined>(undefined);
 
   const { fromToken, toToken } = tokenForm;
   const { fromAmount, toAmount } = amountForm;
-  const ballance = walletService.getBalance(tokenForm.fromToken || "");
+  const ballance = walletService.getBalance(fromToken || "");
 
   const calculateAmount = useCallback(
     (from: number, fromTkn: string, toTkn: string): number => {
       const fromPrice = prices[fromTkn];
       const toPrice = prices[toTkn];
       if (!fromPrice || !toPrice || toPrice.price === 0 || from <= 0) return 0;
-      const priceRate = (fromPrice.price / toPrice.price) * 10e6;
-      return parseFloat(((from * Number(priceRate)) / 10e6).toFixed(6));
+      const priceRate =
+        (fromPrice.price / toPrice.price) * DECIMAL_MULTIPLIER;
+      return parseFloat(
+        ((from * Number(priceRate)) / DECIMAL_MULTIPLIER).toFixed(
+          DECIMAL_PRECISION,
+        ),
+      );
     },
     [prices],
   );
@@ -90,18 +93,30 @@ export const useExchangeForm = (
   const handleAmountChange = useCallback(
     (field: keyof AmountForm, value: number | string) => {
       const hasTokens = fromToken && toToken;
-
-      validateField(field, Number(value));
-      setAmountForm((prev) => {
-        if (!hasTokens) return { ...prev, [field]: value };
-        const newAmount = calculateAmount(Number(value), fromToken, toToken);
-        validateField(keyAmountExchange[field], newAmount);
-        return {
-          ...prev,
-          [field]: value,
-          [keyAmountExchange[field]]: newAmount,
-        };
-      });
+      const numValue = Number(value);
+      
+      // Validate input value
+      validateField(field, numValue);
+      
+      // If no tokens selected, just update the field
+      if (!hasTokens) {
+        setAmountForm((prev) => ({ ...prev, [field]: value }));
+        return;
+      }
+      
+      // Calculate the other amount
+      const otherField = keyAmountExchange[field];
+      const newAmount = calculateAmount(numValue, fromToken, toToken);
+      
+      // Validate calculated amount OUTSIDE setState
+      validateField(otherField, newAmount);
+      
+      // Update both amounts
+      setAmountForm((prev) => ({
+        ...prev,
+        [field]: value,
+        [otherField]: newAmount,
+      }));
     },
     [calculateAmount, fromToken, toToken, validateField],
   );
@@ -109,30 +124,37 @@ export const useExchangeForm = (
   const handleTokenChange = useCallback(
     (field: keyof TokenForm, token?: string | null) => {
       validateField(field, token ?? "");
+      
+      // Capture computed values from state update
+      let computedFromToken: string | undefined;
+      let computedToToken: string | undefined;
+      
       setTokenForm((prev: TokenForm) => {
         const otherToken = prev[keyTokenExchange[field]];
-        const fromToken = field === "fromToken" ? token : otherToken;
-        const toToken = field === "toToken" ? token : otherToken;
-        const newData = {
+        computedFromToken = field === "fromToken" ? (token ?? "") : otherToken;
+        computedToToken = field === "toToken" ? (token ?? "") : otherToken;
+        
+        return {
           ...prev,
           [field]: token ?? "",
         };
+      });
+      
+      // Update amountForm separately using captured values
+      setAmountForm((amtPrev) => {
+        const formNum = Number(amtPrev.fromAmount);
+        const willRecalculate =
+          computedFromToken && computedToToken && amtPrev.fromAmount && formNum > 0;
 
-        setAmountForm((amtPrev) => {
-          const formNum = Number(amtPrev.fromAmount);
-          const willRecalculate =
-            fromToken && toToken && amtPrev.fromAmount && formNum > 0;
-
-          if (!token) {
-            return { ...amtPrev, toAmount: 0 };
-          } else if (willRecalculate) {
-            const newToAmount = calculateAmount(formNum, fromToken, toToken);
-            validateField("toAmount", newToAmount);
-            return { ...amtPrev, toAmount: newToAmount };
-          }
-          return amtPrev;
-        });
-        return newData;
+        if (!token) {
+          return { ...amtPrev, toAmount: 0 };
+        } else if (willRecalculate) {
+          const newToAmount = calculateAmount(formNum, computedFromToken!, computedToToken!);
+          // Validate OUTSIDE setState by scheduling after
+          queueMicrotask(() => validateField("toAmount", newToAmount));
+          return { ...amtPrev, toAmount: newToAmount };
+        }
+        return amtPrev;
       });
     },
     [calculateAmount, validateField],
@@ -147,12 +169,15 @@ export const useExchangeForm = (
       fromAmount: prev.toAmount,
       toAmount: prev.fromAmount,
     }));
-    setFormError((prev) => ({
-      fromToken: prev?.toToken,
-      toToken: prev?.fromToken,
-      fromAmount: prev?.toAmount,
-      toAmount: prev?.fromAmount,
-    }));
+    setFormError((prev) => {
+      if (!prev) return undefined;
+      return {
+        fromToken: prev.toToken,
+        toToken: prev.fromToken,
+        fromAmount: prev.toAmount,
+        toAmount: prev.fromAmount,
+      };
+    });
   }, []);
 
   const handleAllToken = useCallback(() => {

@@ -1,5 +1,8 @@
 import { Autocomplete, TextField } from "@mui/material";
 import type { AutocompleteProps, TextFieldProps } from "@mui/material";
+import type { Ref } from "react";
+
+const HELPER_TEXT_PLACEHOLDER = " "; // Preserve field height when no error
 
 type CommonAutocompleteProps<T> = {
   name: string;
@@ -7,6 +10,7 @@ type CommonAutocompleteProps<T> = {
   textFieldProps?: Omit<TextFieldProps, "label">;
   onChange?: (value: T | null) => void;
   error?: string;
+  ref?: Ref<HTMLInputElement>;
 } & Omit<AutocompleteProps<T, false, false, false>, "renderInput" | "onChange">;
 
 export const CommonAutocomplete = <T,>({
@@ -20,12 +24,7 @@ export const CommonAutocomplete = <T,>({
   return (
     <Autocomplete
       {...props}
-      onChange={(_, newValue) => {
-        // Call custom onChange if provided
-        if (onChange) {
-          onChange(newValue);
-        }
-      }}
+      onChange={(_, newValue) => onChange?.(newValue)}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -33,12 +32,12 @@ export const CommonAutocomplete = <T,>({
           label={label}
           inputRef={ref}
           error={!!error}
-          helperText={error || " "}
+          helperText={error || HELPER_TEXT_PLACEHOLDER}
           fullWidth
           slotProps={{
             input: {
               ...params.InputProps,
-              ...textFieldProps?.InputProps,
+              ...textFieldProps?.slotProps?.input,
             },
           }}
         />

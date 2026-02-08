@@ -7,6 +7,13 @@ interface TokenAvatarProps {
   size?: number;
 }
 
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const target = e.currentTarget;
+  if (target instanceof HTMLImageElement) {
+    target.style.display = "none";
+  }
+};
+
 export const TokenAvatar = React.memo(
   ({ token, size = 24 }: TokenAvatarProps) => {
     if (!token) return null;
@@ -15,17 +22,16 @@ export const TokenAvatar = React.memo(
         <img
           key={token}
           src={getTokenIcon(token)}
-          alt={token}
+          alt={`${token} token icon`}
           loading="lazy"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = "none";
-          }}
+          onError={handleImageError}
         />
       </TokenAvatarStyled>
     );
   },
 );
+
+TokenAvatar.displayName = "TokenAvatar";
 
 const TokenAvatarStyled = styled("div")<{ size: number }>(({ size }) => ({
   width: size,
@@ -47,14 +53,20 @@ const TokenAvatarStyled = styled("div")<{ size: number }>(({ size }) => ({
 interface TokenOptionProps extends React.HTMLAttributes<HTMLLIElement> {
   option: string;
 }
+
+const TokenOptionStyled = styled("li")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+}));
+
 export const TokenOption = React.memo(
   ({ option, ...props }: TokenOptionProps) => (
-    <li
-      {...props}
-      style={{ display: "flex", alignItems: "center", gap: "8px" }}
-    >
+    <TokenOptionStyled {...props}>
       <TokenAvatar token={option} size={24} />
       {option}
-    </li>
+    </TokenOptionStyled>
   ),
 );
+
+TokenOption.displayName = "TokenOption";

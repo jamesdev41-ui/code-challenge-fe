@@ -1,6 +1,5 @@
-import { getLatestPricesMap } from "@common";
 import type { TokenPriceType } from "@types";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import type { useExchangeForm } from "./hooks";
 import { useExchangeModal } from "@contexts";
 import {
@@ -21,12 +20,11 @@ import {
 } from "@mui/material";
 
 interface ExchangeFormProps {
-  prices: TokenPriceType[];
+  pricesMap: Record<string, TokenPriceType>;
   formData: ReturnType<typeof useExchangeForm>;
 }
 
-export const ExchangeForm = ({ prices, formData }: ExchangeFormProps) => {
-  const pricesMap = useMemo(() => getLatestPricesMap(prices), [prices]);
+export const ExchangeForm = ({ pricesMap, formData }: ExchangeFormProps) => {
 
   const { isOpen, selectedCurrency } = useExchangeModal();
 
@@ -61,7 +59,6 @@ export const ExchangeForm = ({ prices, formData }: ExchangeFormProps) => {
     if (isOpen && selectedCurrency) {
       handleTokenChange("fromToken", selectedCurrency);
     }
-    // handleToken changed after fromToken is set, not in dependency array cause bug set from token wrongly
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, selectedCurrency]);
   return (
@@ -89,19 +86,20 @@ export const ExchangeForm = ({ prices, formData }: ExchangeFormProps) => {
               value={fromToken}
               error={formError?.fromToken}
               textFieldProps={{
-                InputProps: {
-                  startAdornment: fromToken && (
-                    <TokenAvatar token={fromToken} />
-                  ),
+                slotProps: {
+                  input: {
+                    startAdornment: fromToken && (
+                      <TokenAvatar token={fromToken} />
+                    ),
+                  },
                 },
               }}
             />
             <CommonNumberInput
               name="fromAmount"
               label="Amount"
-              type="number"
               onChange={(e) => {
-                handleAmountChange("fromAmount", e.target.value ?? 0);
+                handleAmountChange("fromAmount", e.target.value);
               }}
               error={!!formError?.fromAmount}
               helperText={formError?.fromAmount}
@@ -143,20 +141,21 @@ export const ExchangeForm = ({ prices, formData }: ExchangeFormProps) => {
               value={toToken}
               error={formError?.toToken}
               textFieldProps={{
-                InputProps: {
-                  startAdornment: toToken && <TokenAvatar token={toToken} />,
+                slotProps: {
+                  input: {
+                    startAdornment: toToken && <TokenAvatar token={toToken} />,
+                  },
                 },
               }}
             />
             <CommonNumberInput
               name="toAmount"
               label="Amount"
-              type="number"
               value={toAmount ?? ""}
               error={!!formError?.toAmount}
               helperText={formError?.toAmount}
               onChange={(e) => {
-                handleAmountChange("toAmount", e.target.value ?? 0);
+                handleAmountChange("toAmount", e.target.value);
               }}
               slotProps={{
                 htmlInput: { min: 0 },

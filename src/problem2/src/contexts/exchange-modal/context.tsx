@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import type { ReactNode } from "react";
 import { ExchangeModalContext } from "./context-definition";
 
 interface ExchangeModalProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export const ExchangeModalProvider = ({
@@ -12,17 +13,18 @@ export const ExchangeModalProvider = ({
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(null);
 
   const openModal = useCallback((currency?: string) => {
-    setSelectedCurrency(currency || null);
+    setSelectedCurrency(currency ?? null);
     setIsOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
     setIsOpen(false);
+    setSelectedCurrency(null);
   }, []);
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({ isOpen, selectedCurrency, openModal, closeModal }),
-    [isOpen, selectedCurrency, openModal, closeModal]
+    [isOpen, selectedCurrency, openModal, closeModal],
   );
 
   return (

@@ -2,9 +2,14 @@ import { Typography, Grid, Box, Button, styled } from "@mui/material";
 import { useExchangeModal } from "@contexts";
 import { useWallets } from "@api";
 
+const getWalletCountText = (count: number): string => {
+  if (!count) return "";
+  const label = count > 1 ? "currencies" : "currency";
+  return `(${count} ${label})`;
+};
+
 export const AppHeader = () => {
   const { openModal } = useExchangeModal();
-
   const { data: wallets } = useWallets();
 
   return (
@@ -17,12 +22,7 @@ export const AppHeader = () => {
       >
         <Grid size={{ xs: 1, sm: 1, md: 2 }}>
           <Typography variant="h4" component="h1" textAlign="center">
-            My Wallet
-          </Typography>
-          <Typography variant="h4" component="h1" textAlign="center">
-            {wallets &&
-              wallets.length > 0 &&
-              `(${wallets.length} ${wallets.length > 1 ? "currencies" : "currency"})`}
+            My Wallet {getWalletCountText(wallets?.length ?? 0)}
           </Typography>
         </Grid>
         <Grid size={{ xs: 1, sm: 1, md: 2 }} textAlign="center">
@@ -41,6 +41,6 @@ const AppHeaderStyled = styled(Box)(({ theme }) => ({
   zIndex: 1000,
   padding: theme.spacing(2),
   marginBottom: theme.spacing(3),
-  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  boxShadow: theme.shadows[1],
   backgroundColor: theme.palette.background.paper,
 }));
